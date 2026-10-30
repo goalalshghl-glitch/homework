@@ -1,0 +1,909 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1f6f5c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="الواجبات">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}</style>
+</head>
+<body>
+<title>دفتر الواجبات</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@500;700&display=swap">
+<style>
+/* Layout: a school planner — three tabs (homework, exams, syllabus), a summary strip, eight subject tabs, then the list for the active tab. */
+:root{
+  --bg:#f3f5f4; --paper:#ffffff; --ink:#1d2a33; --muted:#5f6f78; --line:#dde3e1;
+  --accent:#1f6f5c; --accent-ink:#ffffff; --soft:#e6f0ec;
+  --late:#b3362c; --late-bg:#fbe9e6; --soon:#a86a0b; --soon-bg:#fbf1dc; --ok:#2c7a4b; --ok-bg:#e3f3e8;
+  --c-chem:#c2410c; --c-bio:#15803d; --c-math:#1d4ed8; --c-eng:#7c3aed;
+  --c-lang:#b45309; --c-dig:#0e7490; --c-crit:#be185d; --c-quran:#047857;
+  --c-x1:#4f5d75; --c-x2:#0369a1; --c-x3:#a21caf; --c-x4:#65a30d;
+  --display:"Reem Kufi","IBM Plex Sans Arabic",Tahoma,sans-serif;
+  --body:"IBM Plex Sans Arabic",Tahoma,"Segoe UI",sans-serif;
+  --radius:12px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11181c; --paper:#182227; --ink:#e7eeec; --muted:#97a6ad; --line:#2a373d;
+  --accent:#5cc4a6; --accent-ink:#0d1a16; --soft:#1d2f2a;
+  --late:#f2877c; --late-bg:#3a1f1c; --soon:#e9b65a; --soon-bg:#33291a; --ok:#6fd39a; --ok-bg:#183024;
+  --c-chem:#fb923c; --c-bio:#4ade80; --c-math:#7aa2ff; --c-eng:#b69cff;
+  --c-lang:#f5b454; --c-dig:#4fd1e6; --c-crit:#f472b6; --c-quran:#34d399;
+  --c-x1:#a3b1c6; --c-x2:#5ec2f7; --c-x3:#e879f9; --c-x4:#a3e635;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11181c; --paper:#182227; --ink:#e7eeec; --muted:#97a6ad; --line:#2a373d;
+  --accent:#5cc4a6; --accent-ink:#0d1a16; --soft:#1d2f2a;
+  --late:#f2877c; --late-bg:#3a1f1c; --soon:#e9b65a; --soon-bg:#33291a; --ok:#6fd39a; --ok-bg:#183024;
+  --c-chem:#fb923c; --c-bio:#4ade80; --c-math:#7aa2ff; --c-eng:#b69cff;
+  --c-lang:#f5b454; --c-dig:#4fd1e6; --c-crit:#f472b6; --c-quran:#34d399;
+  --c-x1:#a3b1c6; --c-x2:#5ec2f7; --c-x3:#e879f9; --c-x4:#a3e635;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6}
+.wrap{max-width:1080px;margin:0 auto;padding-block:20px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:22px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;font-weight:700}
+h1{font-size:clamp(26px,5vw,34px);line-height:1.2}
+h2{font-size:19px}
+h3{font-size:16px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;justify-content:space-between}
+.dates{color:var(--muted);font-size:14px;display:grid;gap:2px}
+.dates b{color:var(--ink);font-weight:600}
+.btn{border:0;border-radius:10px;padding:10px 18px;background:var(--accent);color:var(--accent-ink);font-weight:600;display:inline-flex;gap:8px;align-items:center}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.danger{background:var(--late);color:#fff}
+.btn.small{padding:6px 14px;font-size:14px}
+.btn:disabled{opacity:.6;cursor:default}
+
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs a{padding:10px 16px;text-decoration:none;color:var(--muted);font-weight:600;border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap;display:flex;gap:8px;align-items:center}
+.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tabs .cnt{font-size:12px;background:var(--soft);color:var(--muted);border-radius:10px;padding:0 7px;font-variant-numeric:tabular-nums}
+
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;display:grid;gap:2px}
+.stat .n{font-family:var(--display);font-size:28px;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat .l{color:var(--muted);font-size:13px}
+.stat.late .n{color:var(--late)} .stat.soon .n{color:var(--soon)} .stat.ok .n{color:var(--ok)}
+@media (max-width:620px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.subjects{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:860px){.subjects{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.subj{--c:var(--accent);text-align:start;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:12px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;position:relative;transition:border-color .15s}
+.subj:hover{border-color:var(--c)}
+.subj[aria-pressed="true"]{border-color:var(--c);box-shadow:0 0 0 2px var(--c) inset}
+.glyph{grid-row:span 2;width:46px;height:46px;border-radius:10px;display:grid;place-items:center;font-weight:700;font-size:16px;color:var(--c);background:color-mix(in srgb,var(--c) 13%,transparent);direction:ltr;font-family:var(--body)}
+.subj .name{font-weight:600;min-width:0;padding-left:30px}
+.subj .meta{font-size:12.5px;color:var(--muted);min-width:0}
+.subj .badge{position:absolute;top:10px;left:10px;min-width:24px;height:24px;padding:0 7px;border-radius:12px;background:var(--c);color:var(--paper);font-size:12.5px;font-weight:700;display:grid;place-items:center;font-variant-numeric:tabular-nums}
+.subj .badge.zero{background:var(--soft);color:var(--muted)}
+.subj .bar{grid-column:1/-1;height:6px;border-radius:3px;background:var(--soft);overflow:hidden;margin-top:6px}
+.subj .bar i{display:block;height:100%;background:var(--c);border-radius:3px}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.seg{display:inline-flex;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{border:0;background:transparent;padding:6px 12px;border-radius:7px;color:var(--muted);font-size:14px}
+.seg button[aria-pressed="true"]{background:var(--soft);color:var(--ink);font-weight:600}
+.filter-note{font-size:14px;color:var(--muted);display:flex;gap:8px;align-items:center}
+.linkbtn{border:0;background:none;color:var(--accent);text-decoration:underline;padding:0}
+
+.list{display:grid;gap:8px}
+.group-h{font-size:13px;color:var(--muted);font-weight:600;letter-spacing:.02em;margin-top:8px}
+.task{--c:var(--accent);background:var(--paper);border:1px solid var(--line);border-inline-start:4px solid var(--c);border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start}
+.task.done{opacity:.62}
+.task.done .t-title{text-decoration:line-through}
+.check{width:24px;height:24px;margin-top:2px;border-radius:7px;border:2px solid var(--c);background:transparent;display:grid;place-items:center;padding:0;flex:none}
+.done > .check,.lesson.done .check{background:var(--c)}
+.check svg{width:14px;height:14px;opacity:0}
+.done > .check svg,.lesson.done .check svg{opacity:1}
+.t-body{min-width:0;display:grid;gap:3px}
+.t-top{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.t-title{font-weight:600;overflow-wrap:anywhere}
+.t-sub{font-size:13px;color:var(--c);font-weight:600}
+.t-notes{font-size:13.5px;color:var(--muted);overflow-wrap:anywhere;white-space:pre-wrap}
+.pill{font-size:12px;padding:1px 9px;border-radius:20px;font-weight:600;white-space:nowrap}
+.pill.late{background:var(--late-bg);color:var(--late)}
+.pill.soon{background:var(--soon-bg);color:var(--soon)}
+.pill.later{background:var(--soft);color:var(--muted)}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pill.kind{background:transparent;border:1px solid var(--line);color:var(--muted);font-weight:500}
+.t-due{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.t-actions{display:flex;gap:4px}
+.icon-btn{border:0;background:transparent;color:var(--muted);width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex:none}
+.icon-btn:hover{background:var(--soft);color:var(--ink)}
+.icon-btn svg{width:17px;height:17px}
+.confirm{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;padding-top:6px;border-top:1px dashed var(--line)}
+
+/* exam date block */
+.datebox{width:54px;text-align:center;border-radius:9px;background:color-mix(in srgb,var(--c) 12%,transparent);color:var(--c);padding:4px 0;line-height:1.25;flex:none}
+.datebox b{display:block;font-family:var(--display);font-size:22px;font-variant-numeric:tabular-nums}
+.datebox span{font-size:11.5px;font-weight:600}
+.exam{grid-template-columns:auto auto 1fr auto}
+.score{font-size:13px;font-weight:600;color:var(--ok)}
+
+/* syllabus */
+.syl-grid{display:grid;gap:8px}
+.syl-row{--c:var(--accent);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr auto;gap:6px 14px;align-items:center;text-align:start}
+.syl-row:hover{border-color:var(--c)}
+.syl-row .glyph{grid-row:auto;width:40px;height:40px;font-size:14px}
+.syl-row .info{min-width:0;display:grid;gap:6px}
+.syl-row .pct{font-family:var(--display);font-size:20px;color:var(--c);font-variant-numeric:tabular-nums}
+.pbar{height:8px;border-radius:4px;background:var(--soft);overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--c);border-radius:4px;transition:width .3s}
+.syl-meta{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.syl-head{--c:var(--accent);background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:grid;gap:10px}
+.syl-head .top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.unit{display:grid;gap:4px}
+.unit-h{display:flex;justify-content:space-between;gap:10px;align-items:baseline;font-weight:700;font-size:14.5px;padding:10px 2px 4px;border-bottom:1px solid var(--line)}
+.unit-h span{font-weight:500;color:var(--muted);font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lesson{--c:var(--accent);display:flex;gap:10px;align-items:center;padding:7px 4px;border-radius:8px}
+.lesson:hover{background:var(--soft)}
+.lesson .lt{flex:1;min-width:0;overflow-wrap:anywhere}
+.lesson.done .lt{color:var(--muted);text-decoration:line-through}
+.lesson .icon-btn{opacity:.5}
+.lesson:hover .icon-btn{opacity:1}
+.import{display:grid;gap:8px;background:var(--paper);border:1px dashed var(--line);border-radius:var(--radius);padding:14px}
+.import textarea{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 11px;width:100%;min-height:130px;resize:vertical}
+.hint{font-size:13px;color:var(--muted)}
+.hint code{background:var(--soft);padding:0 5px;border-radius:4px}
+
+.empty{background:var(--paper);border:1px dashed var(--line);border-radius:var(--radius);padding:28px 20px;text-align:center;color:var(--muted);display:grid;gap:10px;justify-items:center}
+.empty strong{color:var(--ink);font-size:16px}
+.notice{font-size:13px;color:var(--soon);background:var(--soon-bg);border-radius:10px;padding:8px 12px}
+
+/* sheet */
+.overlay{position:fixed;inset:0;background:rgb(0 0 0 / .4);display:grid;place-items:center;z-index:50;padding:16px}
+.sheet{background:var(--paper);border-radius:16px;width:min(520px,100%);min-width:0;grid-template-columns:minmax(0,1fr);max-height:calc(100% - 20px);overflow:auto;padding:20px;display:grid;gap:14px;border:1px solid var(--line)}
+.field{display:grid;gap:5px}
+.field label{font-size:13.5px;font-weight:600}
+.field input,.field select,.field textarea{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 11px;width:100%}
+.field textarea{min-height:70px;resize:vertical}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:460px){.row2{grid-template-columns:1fr}}
+.sheet-actions{display:flex;gap:8px;flex-wrap:wrap}
+.err{color:var(--late);font-size:13px}
+.quick{display:flex;flex-wrap:wrap;gap:6px}
+.quick button{border:1px solid var(--line);background:transparent;border-radius:20px;padding:3px 10px;font-size:12.5px;color:var(--muted)}
+.quick button:hover{border-color:var(--accent);color:var(--ink)}
+.opt{font-weight:400;color:var(--muted)}
+/* timetable */
+.tt-scroll{overflow-x:auto;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius)}
+.tt{border-collapse:separate;border-spacing:6px;width:100%;min-width:760px}
+.tt th{font-weight:600;font-size:13px;color:var(--muted);padding:4px;text-align:center}
+.tt th.day{text-align:start;color:var(--ink);font-size:14.5px;padding-inline:8px;white-space:nowrap;width:84px}
+.tt tr.today th.day{color:var(--accent)}
+.tt tr.today th.day::after{content:"اليوم";display:block;font-size:11px;font-weight:600}
+.per{border:0;background:transparent;color:var(--muted);font-weight:600;font-size:13px;display:grid;gap:0;justify-items:center;width:100%;border-radius:8px;padding:4px}
+.per:hover{background:var(--soft);color:var(--ink)}
+.per small{font-weight:500;font-size:11.5px;font-variant-numeric:tabular-nums;direction:ltr}
+.cell{--c:var(--line);width:100%;min-height:58px;border-radius:9px;border:1px dashed var(--line);background:transparent;color:var(--muted);font-size:13px;padding:6px;display:grid;place-items:center;text-align:center;line-height:1.3}
+.cell:hover{border-color:var(--accent);color:var(--ink)}
+.cell.set{border:0;background:color-mix(in srgb,var(--c) 14%,var(--paper));color:var(--c);font-weight:700;font-size:14px;box-shadow:inset 0 -3px 0 var(--c)}
+.cell.free{border:0;background:var(--soft);color:var(--muted);font-weight:500}
+.cell.none{border:0;background:repeating-linear-gradient(135deg,var(--soft) 0 6px,transparent 6px 12px);color:var(--muted);cursor:default;font-weight:500}
+.tt tr.today .cell.set{box-shadow:inset 0 -3px 0 var(--c),0 0 0 2px var(--c)}
+.pick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.pick button{--c:var(--accent);border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:9px 10px;display:flex;gap:10px;align-items:center;text-align:start;font-weight:600}
+.pick button:hover,.pick button[aria-pressed="true"]{border-color:var(--c);box-shadow:inset 0 0 0 1px var(--c)}
+.pick .glyph{grid-row:auto;width:32px;height:32px;font-size:12px;flex:none}
+/* subject manager */
+.mrow{--c:var(--accent);display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.mrow .glyph{grid-row:auto;width:40px;height:40px;font-size:14px}
+.mfields{display:grid;gap:8px;min-width:0}
+.mline{display:flex;gap:8px;align-items:center}
+.mline input{flex:1 1 0;width:0;min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+.mline input.mglyph{flex:0 0 64px;text-align:center}
+#mgr .mline > #mgrNew{background:var(--bg)}
+.swatches{display:flex;flex-wrap:wrap;gap:6px}
+.swatches button{width:24px;height:24px;border-radius:50%;border:2px solid transparent;background:var(--sw);padding:0}
+.swatches button[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 2px var(--paper)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap" dir="rtl" lang="ar">
+  <header>
+    <div style="display:grid;gap:6px">
+      <h1>دفتر الواجبات</h1>
+      <div class="dates" id="dates"></div>
+    </div>
+    <button class="btn" id="addBtn" type="button">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span id="addLbl">إضافة واجب</span>
+    </button>
+  </header>
+
+  <nav class="tabs" aria-label="الأقسام">
+    <a href="#homework" data-tab="homework">الواجبات <span class="cnt" id="cHw">0</span></a>
+    <a href="#exams" data-tab="exams">الاختبارات <span class="cnt" id="cEx">0</span></a>
+    <a href="#syllabus" data-tab="syllabus">المنهج <span class="cnt" id="cSy">٠٪</span></a>
+    <a href="#timetable" data-tab="timetable">الجدول</a>
+  </nav>
+
+  <div id="notice" class="notice" hidden></div>
+
+  <section class="stats" aria-label="ملخص" id="stats"></section>
+
+  <section style="display:grid;gap:10px" id="subjSec">
+    <div class="toolbar"><h2>المواد</h2><button class="btn ghost small" type="button" data-act="manage">تعديل المواد</button></div>
+    <div class="subjects" id="subjects"></div>
+  </section>
+
+  <section style="display:grid;gap:10px">
+    <div class="toolbar">
+      <h2 id="listTitle">كل الواجبات</h2>
+      <div class="seg" role="group" aria-label="عرض" id="seg">
+        <button type="button" data-view="pending" aria-pressed="true">المتبقية</button>
+        <button type="button" data-view="done" aria-pressed="false">المنجزة</button>
+        <button type="button" data-view="all" aria-pressed="false">الكل</button>
+      </div>
+    </div>
+    <div class="filter-note" id="filterNote" hidden></div>
+    <div class="list" id="list">
+      <div class="empty"><strong>جاري التحميل…</strong></div>
+    </div>
+  </section>
+</div>
+
+<!-- subject manager -->
+<div class="overlay" id="mgr" hidden dir="rtl" lang="ar">
+  <div class="sheet" role="dialog" aria-labelledby="mgrTitle">
+    <h2 id="mgrTitle">تعديل المواد</h2>
+    <p class="hint" style="margin:0">غيّر اسم المادة أو رمزها أو لونها، أو احذفها، أو أضف مادة جديدة. التعديلات تنحفظ لما تضغط "حفظ".</p>
+    <div id="mgrList" style="display:grid;gap:10px"></div>
+    <div class="mline"><input id="mgrNew" maxlength="40" placeholder="اسم مادة جديدة، مثال: فيزياء" aria-label="اسم مادة جديدة"><button class="btn small" type="button" id="mgrAdd" data-m="add">إضافة</button></div>
+    <div class="err" id="mgrErr" hidden></div>
+    <div class="sheet-actions"><button class="btn" type="button" id="mgrSave">حفظ</button><button class="btn ghost" type="button" id="mgrCancel">إلغاء</button></div>
+  </div>
+</div>
+
+<!-- timetable picker -->
+<div class="overlay" id="picker" hidden dir="rtl" lang="ar">
+  <div class="sheet" role="dialog" aria-labelledby="pkTitle">
+    <h2 id="pkTitle">اختر المادة</h2>
+    <div class="pick" id="pkList"></div>
+    <div id="pkTimeWrap" hidden style="display:grid;gap:12px">
+      <div class="row2">
+        <div class="field"><label for="pkFrom">من</label><input id="pkFrom" type="time"></div>
+        <div class="field"><label for="pkTo">إلى</label><input id="pkTo" type="time"></div>
+      </div>
+      <div class="sheet-actions"><button class="btn" type="button" id="pkSaveTime">حفظ الوقت</button></div>
+    </div>
+    <div class="sheet-actions"><button class="btn ghost" type="button" id="pkCancel">إغلاق</button></div>
+  </div>
+</div>
+
+<!-- homework / exam form -->
+<div class="overlay" id="overlay" hidden dir="rtl" lang="ar">
+  <form class="sheet" id="form" novalidate>
+    <h2 id="formTitle">واجب جديد</h2>
+    <div class="row2">
+      <div class="field"><label for="fSubject">المادة</label><select id="fSubject"></select></div>
+      <div class="field" id="kindField"><label for="fKind">النوع</label>
+        <select id="fKind"><option>واجب</option><option>تقرير</option><option>مشروع</option><option>بحث</option><option>تسميع</option><option>عرض تقديمي</option></select></div>
+      <div class="field" id="examTypeField" hidden><label for="fExType">نوع الاختبار</label>
+        <select id="fExType"><option>اختبار قصير</option><option>اختبار فتري</option><option>اختبار نهائي</option><option>اختبار عملي</option><option>اختبار شفهي</option></select></div>
+    </div>
+    <div class="field"><label for="fTitle" id="fTitleLbl">المطلوب</label><input id="fTitle" maxlength="140" placeholder="مثال: حل تمارين صفحة ٤٥"></div>
+    <div class="row2">
+      <div class="field"><label for="fDue" id="fDueLbl">موعد التسليم</label><input id="fDue" type="date"></div>
+      <div class="field" id="timeField" hidden><label for="fTime">الوقت <span class="opt">(اختياري)</span></label><input id="fTime" type="time"></div>
+    </div>
+    <div class="quick" id="quick">
+      <button type="button" data-d="0">اليوم</button><button type="button" data-d="1">غدًا</button>
+      <button type="button" data-d="2">بعد يومين</button><button type="button" data-d="7">بعد أسبوع</button>
+    </div>
+    <div class="field" id="scoreField" hidden><label for="fScore">الدرجة <span class="opt">(اختياري، بعد الاختبار)</span></label><input id="fScore" maxlength="20" placeholder="مثال: ١٨ من ٢٠"></div>
+    <div class="field"><label for="fNotes">ملاحظات <span class="opt">(اختياري)</span></label><textarea id="fNotes" maxlength="600" placeholder="رقم الصفحة، طريقة التسليم، اسم المعلم…"></textarea></div>
+    <div class="err" id="fErr" hidden></div>
+    <div class="sheet-actions">
+      <button class="btn" type="submit" id="fSave">حفظ</button>
+      <button class="btn ghost" type="button" id="fCancel">إلغاء</button>
+    </div>
+  </form>
+</div>
+
+<script>
+const DEFAULT_SUBJECTS = [
+  {id:"chem",  name:"كيمياء",        glyph:"H₂O", c:"--c-chem"},
+  {id:"bio",   name:"أحياء",         glyph:"DNA", c:"--c-bio"},
+  {id:"math",  name:"رياضيات",       glyph:"∑x",  c:"--c-math"},
+  {id:"eng",   name:"إنجليزي",       glyph:"Aa",  c:"--c-eng"},
+  {id:"lang",  name:"كفايات لغوية",  glyph:"ض",   c:"--c-lang"},
+  {id:"dig",   name:"مهارات رقمية",  glyph:"</>", c:"--c-dig"},
+  {id:"crit",  name:"تفكير ناقد",    glyph:"؟",   c:"--c-crit"},
+  {id:"quran", name:"قرآن وتفسير",   glyph:"۞",   c:"--c-quran"},
+];
+const COLORS=['--c-chem','--c-bio','--c-math','--c-eng','--c-lang','--c-dig','--c-crit','--c-quran','--c-x1','--c-x2','--c-x3','--c-x4'];
+let SUBJECTS = DEFAULT_SUBJECTS.slice();
+let SUB = Object.fromEntries(SUBJECTS.map(s=>[s.id,s]));
+function setSubjects(list){
+  SUBJECTS = (Array.isArray(list)&&list.length) ? list.filter(s=>s&&s.id&&s.name).map(s=>({id:String(s.id),name:String(s.name),glyph:String(s.glyph||s.name.slice(0,1)),c:COLORS.includes(s.c)?s.c:'--c-x1'})) : DEFAULT_SUBJECTS.slice();
+  SUB = Object.fromEntries(SUBJECTS.map(s=>[s.id,s]));
+  if(filterSubject&&!SUB[filterSubject]) filterSubject=null;
+}
+const $ = id => document.getElementById(id);
+const nf = new Intl.NumberFormat('ar-SA');
+const ICON_CHECK = '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3L13 4.5" stroke="var(--paper)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_EDIT = '<svg viewBox="0 0 20 20" fill="none"><path d="M4 14.5V16h1.5l8.6-8.6-1.5-1.5L4 14.5zM14.6 4.4l1 1a1 1 0 010 1.4l-.9.9-2.4-2.4.9-.9a1 1 0 011.4 0z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+const ICON_DEL = '<svg viewBox="0 0 20 20" fill="none"><path d="M5 6h10M8 6V4.5h4V6M6.5 6l.6 9.5h5.8l.6-9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+let tasks = [];   // homework
+let exams = [];   // {id, subject, type, title, date, time, notes, score, done, doneAt, createdAt}
+let syl = {};     // subjectId -> {items:[{id, unit, title, done}]}
+let tab = 'homework';
+let filterSubject = null;
+let view = 'pending';
+let editing = null;    // {kind:'hw'|'ex', id}
+let confirmKey = null;
+let showImport = false;
+let cols = {};
+let localMode = false;
+
+/* ---------- dates ---------- */
+function todayStr(off=0){const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+off);return d.toISOString().slice(0,10);}
+function parseD(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
+function daysUntil(due){if(!due)return null;const t=new Date();t.setHours(0,0,0,0);return Math.round((parseD(due)-t)/86400000);}
+function fmtDate(due){return new Intl.DateTimeFormat('ar-SA-u-ca-gregory',{weekday:'long',day:'numeric',month:'long'}).format(parseD(due));}
+function fmtHijri(due){try{return new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura',{day:'numeric',month:'long'}).format(parseD(due));}catch(e){return '';}}
+function fmtTime(t){if(!t)return '';const [h,m]=t.split(':').map(Number);const d=new Date();d.setHours(h,m);return new Intl.DateTimeFormat('ar-SA',{hour:'numeric',minute:'2-digit'}).format(d);}
+function relLabel(n, doneWord){
+  if(n===null) return ['later','بدون موعد'];
+  if(n<0) return ['late', n===-1?'متأخر يوم':'متأخر '+nf.format(-n)+' أيام'];
+  if(n===0) return ['late','اليوم'];
+  if(n===1) return ['soon','غدًا'];
+  if(n<=3) return ['soon','بعد '+nf.format(n)+' أيام'];
+  return ['later','بعد '+nf.format(n)+' أيام'];
+}
+function hwLabel(t){ return t.done?['ok','تم']:relLabel(daysUntil(t.due)); }
+function exLabel(x){
+  if(x.done) return ['ok','منجز'];
+  const n=daysUntil(x.date);
+  if(n!==null&&n<0) return ['late','فات موعده، علّمه كمنجز'];
+  return relLabel(n);
+}
+(function(){
+  const now=new Date();
+  let hijri='';
+  try{hijri=new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura',{day:'numeric',month:'long',year:'numeric'}).format(now);}catch(e){}
+  const greg=new Intl.DateTimeFormat('ar-SA-u-ca-gregory',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(now);
+  $('dates').innerHTML='<b></b><span></span>';
+  $('dates').children[0].textContent=greg;
+  $('dates').children[1].textContent=hijri;
+})();
+
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function pct(a,b){return b?Math.round(a*100/b):0;}
+function sylStats(id){const it=(syl[id]?.items)||[];const d=it.filter(i=>i.done).length;return {done:d,total:it.length,left:it.length-d,p:pct(d,it.length)};}
+function sylAll(){let d=0,t=0;SUBJECTS.forEach(s=>{const x=sylStats(s.id);d+=x.done;t+=x.total;});return {done:d,total:t,left:t-d,p:pct(d,t)};}
+function stat(n,l,cls=''){return `<div class="stat ${cls}"><span class="n">${n}</span><span class="l">${l}</span></div>`;}
+
+/* ---------- render ---------- */
+function render(){
+  document.querySelectorAll('.tabs a').forEach(a=>{ if(a.dataset.tab===tab) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+  const hwPending=tasks.filter(t=>!t.done);
+  const exUp=exams.filter(x=>!x.done);
+  const all=sylAll();
+  $('cHw').textContent=nf.format(hwPending.length);
+  $('cEx').textContent=nf.format(exUp.length);
+  $('cSy').textContent=nf.format(all.p)+'٪';
+  $('addLbl').textContent = tab==='exams'?'إضافة اختبار':tab==='syllabus'?'إضافة دروس':'إضافة واجب';
+  $('seg').hidden = tab==='syllabus'||tab==='timetable';
+  $('addBtn').hidden = tab==='timetable';
+  if(tab==='timetable'){
+    $('subjSec').hidden=true; $('filterNote').hidden=true;
+    $('listTitle').textContent='الجدول الدراسي';
+    const ti=todayIdx(); let todayN=0, first='', total=0, empty=0;
+    DAYS.forEach((d,di)=>{for(let p=1;p<=7;p++){if(!hasPeriod(d.id,p))continue;total++;const v=tt.cells?.[d.id+'-'+p];if(!v)empty++;
+      if(di===ti&&v&&SUB[v]){todayN++;if(!first)first=SUB[v].name;}}});
+    $('stats').innerHTML = stat(ti>=0?nf.format(todayN):'—', ti>=0?'حصص اليوم ('+DAYS[ti].name+')':'اليوم إجازة')
+      + stat(first?esc(first):'—','أول حصة اليوم')
+      + stat(nf.format(total),'حصص الأسبوع')
+      + stat(nf.format(empty),'حصص ما تحددت','soon');
+    renderTT(); return;
+  }
+
+  // stats
+  if(tab==='homework'){
+    $('stats').innerHTML = stat(nf.format(hwPending.length),'واجبات متبقية')
+      + stat(nf.format(hwPending.filter(t=>t.due&&daysUntil(t.due)<0).length),'متأخرة','late')
+      + stat(nf.format(hwPending.filter(t=>{const n=daysUntil(t.due);return n!==null&&n>=0&&n<=7;}).length),'تسليمها خلال ٧ أيام','soon')
+      + stat(nf.format(tasks.filter(t=>t.done).length),'تم إنجازها','ok');
+  } else if(tab==='exams'){
+    const next=exUp.filter(x=>x.date&&daysUntil(x.date)>=0).sort(byDate)[0];
+    $('stats').innerHTML = stat(nf.format(exUp.length),'اختبارات قادمة')
+      + stat(nf.format(exUp.filter(x=>{const n=daysUntil(x.date);return n!==null&&n>=0&&n<=7;}).length),'خلال ٧ أيام','soon')
+      + stat(nf.format(exams.filter(x=>x.done).length)+' <span style="font-size:15px;color:var(--muted)">من '+nf.format(exams.length)+'</span>','اختبارات منجزة','ok')
+      + stat(next?esc(relLabel(daysUntil(next.date))[1]):'—', next?'أقرب اختبار: '+esc(SUB[next.subject]?.name||''):'لا يوجد اختبار قريب');
+  } else {
+    $('stats').innerHTML = stat(nf.format(all.p)+'٪','نسبة الإنجاز الكلية')
+      + stat(nf.format(all.done),'دروس منجزة','ok')
+      + stat(nf.format(all.left),'دروس باقية','soon')
+      + stat(nf.format(all.total),'مجموع الدروس');
+  }
+
+  // subjects
+  $('subjSec').hidden = tab==='syllabus';
+  if(tab!=='syllabus'){
+    $('subjects').innerHTML=SUBJECTS.map(s=>{
+      let count=0, meta='';
+      if(tab==='homework'){
+        const p=hwPending.filter(t=>t.subject===s.id).sort(byDue); count=p.length;
+        const next=p.find(t=>t.due);
+        meta = !p.length?'لا يوجد واجبات': next?'الأقرب: '+hwLabel(next)[1]:nf.format(p.length)+' بدون موعد';
+      } else {
+        const p=exUp.filter(x=>x.subject===s.id).sort(byDate); count=p.length;
+        const next=p.find(x=>x.date&&daysUntil(x.date)>=0);
+        meta = next? fmtDate(next.date) : (p.length?'بدون موعد قادم':'لا يوجد اختبارات');
+      }
+      const sy=sylStats(s.id);
+      return `<button type="button" class="subj" style="--c:var(${s.c})" data-subj="${s.id}" aria-pressed="${filterSubject===s.id}">
+        <span class="glyph" aria-hidden="true">${esc(s.glyph)}</span>
+        <span class="name">${esc(s.name)}</span>
+        <span class="meta">${esc(meta)}</span>
+        <span class="badge ${count?'':'zero'}">${nf.format(count)}</span>
+        ${sy.total?`<span class="bar" title="المنهج ${sy.p}٪"><i style="width:${sy.p}%"></i></span>`:''}
+      </button>`;
+    }).join('');
+  }
+
+  // title & filter
+  const sname = filterSubject?SUB[filterSubject].name:'';
+  $('listTitle').textContent = tab==='homework'?(filterSubject?'واجبات '+sname:'كل الواجبات')
+    : tab==='exams'?(filterSubject?'اختبارات '+sname:'قائمة الاختبارات')
+    : (filterSubject?'منهج '+sname:'فهرس المواد');
+  if(filterSubject){
+    $('filterNote').hidden=false;
+    $('filterNote').innerHTML = tab==='syllabus'
+      ? '<button type="button" class="linkbtn" id="clearF">رجوع لكل المواد</button>'
+      : 'تعرض مادة واحدة فقط. <button type="button" class="linkbtn" id="clearF">عرض كل المواد</button>';
+  } else $('filterNote').hidden=true;
+  document.querySelectorAll('#seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===view));
+  $('seg').children[0].textContent = tab==='exams'?'القادمة':'المتبقية';
+
+  if(tab==='homework') renderHw();
+  else if(tab==='exams') renderEx();
+  else renderSyl();
+}
+
+function emptyBox(msg, sub, act, btn){
+  return `<div class="empty"><strong>${esc(msg)}</strong><span>${esc(sub)}</span>${act?`<button class="btn" type="button" data-act="${act}">${esc(btn)}</button>`:''}</div>`;
+}
+
+function renderHw(){
+  let items=tasks.filter(t=>!filterSubject||t.subject===filterSubject);
+  if(view==='pending') items=items.filter(t=>!t.done);
+  if(view==='done') items=items.filter(t=>t.done);
+  items.sort(view==='done'?(a,b)=>(b.doneAt||0)-(a.doneAt||0):byDue);
+  if(!items.length){
+    const msg = view==='done'?'لا يوجد واجبات منجزة بعد.':(filterSubject?'ما فيه واجبات متبقية في '+SUB[filterSubject].name+'.':'ما عندك واجبات متبقية.');
+    $('list').innerHTML=emptyBox(msg,'أضف واجب جديد وحدد موعد التسليم، وبيظهر هنا مرتب حسب الأقرب.','add','إضافة واجب');return;
+  }
+  let html='',last=null;
+  for(const t of items){
+    const g = view==='done'?null:groupOf(t.done,t.due,'متأخرة');
+    if(g&&g!==last){html+=`<div class="group-h">${g}</div>`;last=g;}
+    html+=hwHtml(t);
+  }
+  $('list').innerHTML=html;
+}
+function renderEx(){
+  let items=exams.filter(x=>!filterSubject||x.subject===filterSubject);
+  if(view==='pending') items=items.filter(x=>!x.done);
+  if(view==='done') items=items.filter(x=>x.done);
+  items.sort(view==='done'?(a,b)=>(b.date||'').localeCompare(a.date||''):byDate);
+  if(!items.length){
+    const msg = view==='done'?'لا يوجد اختبارات منجزة بعد.':(filterSubject?'ما فيه اختبارات قادمة في '+SUB[filterSubject].name+'.':'ما عندك اختبارات قادمة.');
+    $('list').innerHTML=emptyBox(msg,'أضف الاختبار بتاريخه ووقته، وبعد ما تختبر علّمه كمنجز واكتب درجتك.','add','إضافة اختبار');return;
+  }
+  let html='',last=null;
+  for(const x of items){
+    const g = view==='done'?null:groupOf(x.done,x.date,'فات موعدها');
+    if(g&&g!==last){html+=`<div class="group-h">${g}</div>`;last=g;}
+    html+=exHtml(x);
+  }
+  $('list').innerHTML=html;
+}
+function renderSyl(){
+  if(!filterSubject){
+    const rows=SUBJECTS.map(s=>{
+      const x=sylStats(s.id);
+      return `<button type="button" class="syl-row" style="--c:var(${s.c})" data-syl="${s.id}">
+        <span class="glyph" aria-hidden="true">${esc(s.glyph)}</span>
+        <span class="info"><span style="font-weight:600">${esc(s.name)}</span>
+          <span class="pbar"><i style="width:${x.p}%"></i></span>
+          <span class="syl-meta">${x.total?`أنجزت ${nf.format(x.done)} من ${nf.format(x.total)} · باقي ${nf.format(x.left)}`:'ما انضاف الفهرس بعد'}</span></span>
+        <span class="pct">${x.total?nf.format(x.p)+'٪':'—'}</span>
+      </button>`;}).join('');
+    $('list').innerHTML=`<div class="syl-grid">${rows}</div><div class="sheet-actions"><button class="btn ghost small" type="button" data-act="manage">تعديل المواد</button></div>`;
+    return;
+  }
+  const s=SUB[filterSubject], x=sylStats(s.id), items=(syl[s.id]?.items)||[];
+  let html=`<div class="syl-head" style="--c:var(${s.c})">
+    <div class="top"><h3>${esc(s.name)}</h3><span class="pct" style="font-family:var(--display);font-size:22px;color:var(--c)">${nf.format(x.p)}٪</span></div>
+    <span class="pbar"><i style="width:${x.p}%"></i></span>
+    <span class="syl-meta">${x.total?`أنجزت ${nf.format(x.done)} درس من ${nf.format(x.total)} · باقي لك ${nf.format(x.left)}`:'ما فيه دروس بعد. ألصق الفهرس تحت.'}</span>
+  </div>`;
+  // units
+  const units=[];const map={};
+  for(const it of items){const u=it.unit||'';if(!(u in map)){map[u]={name:u,items:[]};units.push(map[u]);}map[u].items.push(it);}
+  for(const u of units){
+    const d=u.items.filter(i=>i.done).length;
+    html+=`<div class="unit">${u.name||units.length>1?`<div class="unit-h">${esc(u.name||'دروس أخرى')}<span>${nf.format(d)} / ${nf.format(u.items.length)}</span></div>`:''}`;
+    for(const it of u.items){
+      html+=`<div class="lesson ${it.done?'done':''}" style="--c:var(${s.c})" data-lid="${esc(it.id)}">
+        <button type="button" class="check" data-act="ltoggle" aria-label="${it.done?'إلغاء الإنجاز':'تم الإنجاز'}">${ICON_CHECK}</button>
+        <span class="lt">${esc(it.title)}</span>
+        <button type="button" class="icon-btn" data-act="ldel" aria-label="حذف الدرس">${ICON_DEL}</button>
+      </div>`;
+    }
+    html+='</div>';
+  }
+  if(showImport||!items.length){
+    html+=`<div class="import">
+      <label for="impText" style="font-weight:600">${items.length?'إضافة دروس':'ألصق فهرس المادة'}</label>
+      <textarea id="impText" placeholder="# الوحدة الأولى: ...&#10;الدرس ١: ...&#10;الدرس ٢: ...&#10;# الوحدة الثانية: ...&#10;الدرس ١: ..."></textarea>
+      <span class="hint">كل سطر درس. السطر اللي يبدأ بـ <code>#</code> عنوان وحدة.</span>
+      <div class="sheet-actions"><button class="btn small" type="button" data-act="import">إضافة</button>${items.length?'<button class="btn ghost small" type="button" data-act="imp-cancel">إلغاء</button>':''}</div>
+    </div>`;
+  } else {
+    html+=`<div class="sheet-actions"><button class="btn ghost small" type="button" data-act="imp-open">إضافة دروس</button>
+      ${confirmKey==='clear:'+s.id
+        ?`<span style="font-size:14px">حذف فهرس ${esc(s.name)} كامل؟</span><button class="btn danger small" type="button" data-act="clear-yes">حذف</button><button class="btn ghost small" type="button" data-act="clear-no">تراجع</button>`
+        :`<button class="btn ghost small" type="button" data-act="clear">مسح الفهرس</button>`}</div>`;
+  }
+  $('list').innerHTML=html;
+}
+
+function groupOf(done,due,lateWord){
+  if(done) return 'منجزة';
+  const n=daysUntil(due);
+  if(n===null) return 'بدون موعد';
+  if(n<0) return lateWord;
+  if(n===0) return 'اليوم';
+  if(n===1) return 'غدًا';
+  if(n<=7) return 'هذا الأسبوع';
+  return 'لاحقًا';
+}
+function cmpDate(a,b,ka,kb){
+  if(!ka&&!kb) return (a.createdAt||0)-(b.createdAt||0);
+  if(!ka) return 1; if(!kb) return -1;
+  return ka<kb?-1:ka>kb?1:(a.createdAt||0)-(b.createdAt||0);
+}
+function byDue(a,b){ if(a.done!==b.done) return a.done?1:-1; return cmpDate(a,b,a.due,b.due); }
+function byDate(a,b){ if(a.done!==b.done) return a.done?1:-1; return cmpDate(a,b,(a.date||'')+(a.time||''),(b.date||'')+(b.time||'')); }
+
+function confirmHtml(key,msg){
+  return confirmKey===key?`<div class="confirm"><span>${msg}</span><button class="btn danger small" type="button" data-act="del-yes">حذف</button><button class="btn ghost small" type="button" data-act="del-no">تراجع</button></div>`:'';
+}
+function hwHtml(t){
+  const s=SUB[t.subject]||{name:'مادة محذوفة',c:'--muted'};
+  const [cls,lbl]=hwLabel(t);
+  return `<article class="task ${t.done?'done':''}" style="--c:var(${s.c})" data-kind="hw" data-id="${esc(t.id)}">
+    <button type="button" class="check" data-act="toggle" aria-label="${t.done?'إلغاء الإنجاز':'تم الإنجاز'}">${ICON_CHECK}</button>
+    <div class="t-body">
+      <div class="t-top"><span class="t-sub">${esc(s.name)}</span>${t.kind&&t.kind!=='واجب'?`<span class="pill kind">${esc(t.kind)}</span>`:''}<span class="pill ${cls}">${esc(lbl)}</span></div>
+      <div class="t-title">${esc(t.title)}</div>
+      ${t.due?`<div class="t-due">التسليم: ${esc(fmtDate(t.due))}</div>`:''}
+      ${t.notes?`<div class="t-notes">${esc(t.notes)}</div>`:''}
+    </div>
+    <div class="t-actions">
+      <button type="button" class="icon-btn" data-act="edit" aria-label="تعديل">${ICON_EDIT}</button>
+      <button type="button" class="icon-btn" data-act="del" aria-label="حذف">${ICON_DEL}</button>
+    </div>
+    ${confirmHtml('hw:'+t.id,'حذف هذا الواجب نهائيًا؟')}
+  </article>`;
+}
+function exHtml(x){
+  const s=SUB[x.subject]||{name:'مادة محذوفة',c:'--muted'};
+  const [cls,lbl]=exLabel(x);
+  let dbx='<div class="datebox"><b>—</b><span>بدون تاريخ</span></div>';
+  if(x.date){const d=parseD(x.date);
+    dbx=`<div class="datebox"><b>${nf.format(d.getDate())}</b><span>${esc(new Intl.DateTimeFormat('ar-SA-u-ca-gregory',{month:'short'}).format(d))}</span></div>`;}
+  return `<article class="task exam ${x.done?'done':''}" style="--c:var(${s.c})" data-kind="ex" data-id="${esc(x.id)}">
+    <button type="button" class="check" data-act="toggle" aria-label="${x.done?'إلغاء الإنجاز':'تم الاختبار'}">${ICON_CHECK}</button>
+    ${dbx}
+    <div class="t-body">
+      <div class="t-top"><span class="t-sub">${esc(s.name)}</span>${x.type?`<span class="pill kind">${esc(x.type)}</span>`:''}<span class="pill ${cls}">${esc(lbl)}</span></div>
+      <div class="t-title">${esc(x.title)}</div>
+      ${x.date?`<div class="t-due">${esc(fmtDate(x.date))}${fmtHijri(x.date)?' · '+esc(fmtHijri(x.date)):''}${x.time?' · الساعة '+esc(fmtTime(x.time)):''}</div>`:''}
+      ${x.score?`<div class="score">الدرجة: ${esc(x.score)}</div>`:''}
+      ${x.notes?`<div class="t-notes">${esc(x.notes)}</div>`:''}
+    </div>
+    <div class="t-actions">
+      <button type="button" class="icon-btn" data-act="edit" aria-label="تعديل">${ICON_EDIT}</button>
+      <button type="button" class="icon-btn" data-act="del" aria-label="حذف">${ICON_DEL}</button>
+    </div>
+    ${confirmHtml('ex:'+x.id,'حذف هذا الاختبار نهائيًا؟')}
+  </article>`;
+}
+
+/* ---------- storage ---------- */
+const LS='hw-planner-v2';
+function lsSave(){try{localStorage.setItem(LS,JSON.stringify({tasks,exams,syl,tt,subjects:SUBJECTS}));}catch(e){}}
+function lsLoad(){try{const o=JSON.parse(localStorage.getItem(LS)||'{}');tasks=o.tasks||[];exams=o.exams||[];syl=o.syl||{};tt=o.tt||{cells:{},times:{}};setSubjects(o.subjects);}catch(e){}}
+
+/* ---------- subject manager ---------- */
+let draft=[], mgrConfirm=null;
+function openMgr(){draft=SUBJECTS.map(s=>({...s}));mgrConfirm=null;renderMgr();$('mgr').hidden=false;}
+function closeMgr(){$('mgr').hidden=true;}
+function usage(id){
+  const h=tasks.filter(t=>t.subject===id).length, x=exams.filter(t=>t.subject===id).length, l=((syl[id]?.items)||[]).length;
+  const c=Object.values(tt.cells||{}).filter(v=>v===id).length;
+  const parts=[];if(h)parts.push(nf.format(h)+' واجب');if(x)parts.push(nf.format(x)+' اختبار');if(l)parts.push(nf.format(l)+' درس');if(c)parts.push(nf.format(c)+' حصة');
+  return parts.join('، ');
+}
+function renderMgr(){
+  $('mgrList').innerHTML=draft.map((s,i)=>{
+    const u=usage(s.id);
+    return `<div class="mrow" style="--c:var(${s.c})" data-i="${i}">
+      <span class="glyph" aria-hidden="true">${esc(s.glyph||'؟')}</span>
+      <div class="mfields">
+        <div class="mline"><input aria-label="اسم المادة" data-f="name" value="${esc(s.name)}" maxlength="40">
+          <input aria-label="الرمز" data-f="glyph" value="${esc(s.glyph)}" maxlength="4" class="mglyph" title="رمز قصير يظهر في البطاقة">
+          <button type="button" class="icon-btn" data-m="del" aria-label="حذف ${esc(s.name)}">${ICON_DEL}</button></div>
+        <div class="swatches">${COLORS.map(c=>`<button type="button" data-m="color" data-c="${c}" style="--sw:var(${c})" aria-label="لون" aria-pressed="${s.c===c}"></button>`).join('')}</div>
+        ${mgrConfirm===i?`<div class="confirm"><span>${u?'المادة مرتبطة بـ '+esc(u)+'. بتبقى محفوظة بدون مادة. ':''}حذف ${esc(s.name)}؟</span><button class="btn danger small" type="button" data-m="del-yes">حذف</button><button class="btn ghost small" type="button" data-m="del-no">تراجع</button></div>`:''}
+      </div>
+    </div>`;}).join('');
+}
+document.addEventListener('input',e=>{
+  const row=e.target.closest('.mrow'); if(!row||!e.target.dataset.f) return;
+  const i=+row.dataset.i; draft[i][e.target.dataset.f]=e.target.value;
+  if(e.target.dataset.f==='glyph') row.querySelector('.glyph').textContent=e.target.value||'؟';
+});
+document.addEventListener('click',e=>{
+  if(e.target.closest('[data-act="manage"]')){openMgr();return;}
+  const b=e.target.closest('[data-m]'); if(!b) return;
+  const row=b.closest('.mrow'); const i=row?+row.dataset.i:-1; const m=b.dataset.m;
+  if(m==='color'){draft[i].c=b.dataset.c;renderMgr();}
+  if(m==='del'){ if(draft.length<=1){$('mgrErr').hidden=false;$('mgrErr').textContent='لازم تبقى مادة وحدة على الأقل.';return;} mgrConfirm=i;renderMgr(); }
+  if(m==='del-no'){mgrConfirm=null;renderMgr();}
+  if(m==='del-yes'){draft.splice(i,1);mgrConfirm=null;renderMgr();}
+  if(m==='add'){
+    const name=$('mgrNew').value.trim(); if(!name){$('mgrNew').focus();return;}
+    const used=draft.map(s=>s.c); const c=COLORS.find(x=>!used.includes(x))||COLORS[draft.length%COLORS.length];
+    draft.push({id:'s'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),name,glyph:name.slice(0,1),c});
+    $('mgrNew').value=''; renderMgr(); $('mgrNew').focus();
+  }
+});
+$('mgrNew').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('mgrAdd').click();}});
+$('mgrCancel').addEventListener('click',closeMgr);
+$('mgr').addEventListener('click',e=>{if(e.target.id==='mgr')closeMgr();});
+$('mgrSave').addEventListener('click',async()=>{
+  const list=draft.map(s=>({...s,name:s.name.trim(),glyph:(s.glyph||'').trim()||s.name.trim().slice(0,1)}));
+  if(list.some(s=>!s.name)){$('mgrErr').hidden=false;$('mgrErr').textContent='فيه مادة بدون اسم. اكتب اسمها أو احذفها.';return;}
+  $('mgrErr').hidden=true; $('mgrSave').disabled=true;
+  try{
+    setSubjects(list); render();
+    if(localMode) lsSave(); else await cols.st.doc('subjects').set({list});
+    closeMgr();
+  }catch(err){$('mgrErr').hidden=false;$('mgrErr').textContent='ما انحفظت التعديلات. حاول مرة ثانية.';}
+  finally{$('mgrSave').disabled=false;}
+});
+
+/* ---------- timetable ---------- */
+const DAYS=[{id:'sun',name:'الأحد'},{id:'mon',name:'الاثنين'},{id:'tue',name:'الثلاثاء'},{id:'wed',name:'الأربعاء'},{id:'thu',name:'الخميس'}];
+const NO7=['tue','wed','thu'];
+const ORD=['الأولى','الثانية','الثالثة','الرابعة','الخامسة','السادسة','السابعة'];
+let tt={cells:{},times:{}};
+let pickKey=null;
+function hasPeriod(day,p){return !(p===7&&NO7.includes(day));}
+function todayIdx(){const g=new Date().getDay();return g<=4?g:-1;}
+function renderTT(){
+  const ti=todayIdx();
+  let h='<div class="tt-scroll"><table class="tt"><thead><tr><th></th>';
+  for(let p=1;p<=7;p++){const t=tt.times?.[p];
+    h+=`<th><button type="button" class="per" data-act="ptime" data-p="${p}" aria-label="تعديل وقت الحصة ${ORD[p-1]}">الحصة ${ORD[p-1]}${t?`<small>${esc(t)}</small>`:'<small>+ الوقت</small>'}</button></th>`;}
+  h+='</tr></thead><tbody>';
+  DAYS.forEach((d,di)=>{
+    h+=`<tr class="${di===ti?'today':''}"><th class="day" scope="row">${d.name}</th>`;
+    for(let p=1;p<=7;p++){
+      if(!hasPeriod(d.id,p)){h+='<td><div class="cell none">مافي</div></td>';continue;}
+      const k=d.id+'-'+p, v=tt.cells?.[k];
+      if(v==='free') h+=`<td><button type="button" class="cell free" data-act="pick" data-k="${k}">فراغ</button></td>`;
+      else if(v&&SUB[v]) h+=`<td><button type="button" class="cell set" style="--c:var(${SUB[v].c})" data-act="pick" data-k="${k}">${esc(SUB[v].name)}</button></td>`;
+      else h+=`<td><button type="button" class="cell" data-act="pick" data-k="${k}" aria-label="اختر مادة ${d.name} الحصة ${ORD[p-1]}">+ اختر</button></td>`;
+    }
+    h+='</tr>';
+  });
+  h+='</tbody></table></div><p class="hint">اضغط على أي حصة عشان تختار مادتها، واضغط على رقم الحصة عشان تكتب وقتها.</p>';
+  $('list').innerHTML=h;
+}
+async function saveTT(){
+  render();
+  if(localMode){lsSave();return;}
+  await cols.tt.doc('main').set({cells:tt.cells||{},times:tt.times||{}});
+}
+function openPicker(k){
+  pickKey=k; const [d,p]=k.split('-'); const cur=tt.cells?.[k];
+  $('pkTitle').textContent=DAYS.find(x=>x.id===d).name+' · الحصة '+ORD[+p-1];
+  $('pkList').innerHTML=SUBJECTS.map(s=>`<button type="button" style="--c:var(${s.c})" data-v="${s.id}" aria-pressed="${cur===s.id}"><span class="glyph" style="--c:var(${s.c})">${esc(s.glyph)}</span>${esc(s.name)}</button>`).join('')
+    +`<button type="button" data-v="free" aria-pressed="${cur==='free'}"><span class="glyph">—</span>فراغ</button>`
+    +`<button type="button" data-v="" aria-pressed="false"><span class="glyph">×</span>مسح الحصة</button>`;
+  $('pkTimeWrap').hidden=true; $('pkList').hidden=false;
+  $('picker').hidden=false;
+}
+function openTime(p){
+  pickKey='time-'+p;
+  $('pkTitle').textContent='وقت الحصة '+ORD[p-1];
+  const cur=(tt.times?.[p]||'').split('–');
+  $('pkFrom').value=cur[0]||''; $('pkTo').value=cur[1]||'';
+  $('pkList').hidden=true; $('pkTimeWrap').hidden=false;
+  $('picker').hidden=false; setTimeout(()=>$('pkFrom').focus(),30);
+}
+function closePicker(){$('picker').hidden=true;pickKey=null;}
+function listFor(k){return k==='hw'?tasks:exams;}
+async function saveDoc(k,obj){
+  if(localMode){const arr=listFor(k);const i=arr.findIndex(x=>x.id===obj.id);if(i>=0)arr[i]=obj;else arr.push(obj);lsSave();render();return;}
+  const {id,...body}=obj; await cols[k].doc(id).set(body);
+}
+async function removeDoc(k,id){
+  if(localMode){if(k==='hw')tasks=tasks.filter(t=>t.id!==id);else exams=exams.filter(t=>t.id!==id);lsSave();render();return;}
+  await cols[k].doc(id).delete();
+}
+async function saveSyl(sid,items){
+  syl[sid]={items}; render();
+  if(localMode){lsSave();return;}
+  if(items.length) await cols.sy.doc(sid).set({items}); else await cols.sy.doc(sid).delete();
+}
+function showError(e){
+  const n=$('notice');n.hidden=false;
+  n.textContent = e&&e.code==='quota_exceeded'?'امتلأت المساحة. احذف بعض العناصر المنجزة القديمة ثم حاول مرة أخرى.'
+    :'ما قدرنا نحفظ التغيير. تأكد من الاتصال وحاول مرة ثانية.';
+}
+function startLocal(){
+  if(localMode) return;
+  localMode=true; lsLoad(); render();
+  const n=$('notice');n.hidden=false;n.hidden=true;
+}
+(async function init(){
+  let db=null;
+  try{ db = window.claude&&window.claude.use ? await window.claude.use('db') : null; }catch(e){db=null;}
+  if(!db){startLocal();return;}
+  cols={hw:db.collection('homework'),ex:db.collection('exams'),sy:db.collection('syllabus'),tt:db.collection('timetable'),st:db.collection('settings')};
+  cols.st.doc('subjects').onSnapshot(s=>{if(localMode)return;setSubjects(s.exists?s.data().list:null);render();},()=>{});
+  cols.tt.doc('main').onSnapshot(s=>{if(localMode)return;const d=s.exists?s.data():null;tt={cells:{...(d?.cells||{})},times:{...(d?.times||{})}};render();},()=>{});
+  const fail=()=>{ if(!tasks.length&&!exams.length) startLocal(); };
+  cols.hw.onSnapshot(s=>{if(localMode)return;tasks=s.docs.map(d=>({id:d.id,...d.data()}));render();},fail);
+  cols.ex.onSnapshot(s=>{if(localMode)return;exams=s.docs.map(d=>({id:d.id,...d.data()}));render();},fail);
+  cols.sy.onSnapshot(s=>{if(localMode)return;const o={};s.docs.forEach(d=>o[d.id]=d.data());syl=o;render();},fail);
+})();
+
+/* ---------- routing ---------- */
+function readHash(){const h=location.hash.slice(1);tab=['homework','exams','syllabus','timetable'].includes(h)?h:'homework';}
+window.addEventListener('hashchange',()=>{readHash();filterSubject=null;view='pending';confirmKey=null;showImport=false;render();});
+readHash(); render();
+
+/* ---------- events ---------- */
+function parseImport(text){
+  const out=[];let unit='';
+  text.split(/\r?\n/).forEach(line=>{
+    const l=line.trim(); if(!l) return;
+    if(l.startsWith('#')){unit=l.replace(/^#+\s*/,'');return;}
+    out.push({id:'l'+Date.now().toString(36)+Math.random().toString(36).slice(2,7),unit,title:l.replace(/^[-•*]\s*/,''),done:false});
+  });
+  return out;
+}
+document.addEventListener('click',async e=>{
+  const sb=e.target.closest('.subj');
+  if(sb){filterSubject=filterSubject===sb.dataset.subj?null:sb.dataset.subj;render();return;}
+  const sr=e.target.closest('.syl-row');
+  if(sr){filterSubject=sr.dataset.syl;showImport=false;confirmKey=null;render();return;}
+  if(e.target.id==='clearF'){filterSubject=null;render();return;}
+  const vb=e.target.closest('#seg button'); if(vb){view=vb.dataset.view;render();return;}
+  const act=e.target.closest('[data-act]'); if(!act) return;
+  const a=act.dataset.act;
+  try{
+    if(a==='add'){openForm(tab==='exams'?'ex':'hw');return;}
+    // syllabus actions
+    if(filterSubject&&tab==='syllabus'){
+      const sid=filterSubject; const items=[...((syl[sid]?.items)||[])];
+      if(a==='imp-open'){showImport=true;render();$('impText')?.focus();return;}
+      if(a==='imp-cancel'){showImport=false;render();return;}
+      if(a==='import'){const add=parseImport($('impText').value);if(!add.length){$('impText').focus();return;}showImport=false;await saveSyl(sid,items.concat(add));return;}
+      if(a==='clear'){confirmKey='clear:'+sid;render();return;}
+      if(a==='clear-no'){confirmKey=null;render();return;}
+      if(a==='clear-yes'){confirmKey=null;await saveSyl(sid,[]);return;}
+      const row=act.closest('.lesson');
+      if(row){const i=items.findIndex(x=>x.id===row.dataset.lid);if(i<0)return;
+        if(a==='ltoggle'){items[i]={...items[i],done:!items[i].done};await saveSyl(sid,items);}
+        if(a==='ldel'){items.splice(i,1);await saveSyl(sid,items);}
+        return;}
+    }
+    const card=act.closest('.task'); if(!card) return;
+    const k=card.dataset.kind; const obj=listFor(k).find(x=>x.id===card.dataset.id); if(!obj) return;
+    if(a==='toggle') await saveDoc(k,{...obj,done:!obj.done,doneAt:!obj.done?Date.now():null});
+    if(a==='edit') openForm(k,obj);
+    if(a==='del'){confirmKey=k+':'+obj.id;render();}
+    if(a==='del-no'){confirmKey=null;render();}
+    if(a==='del-yes'){confirmKey=null;await removeDoc(k,obj.id);}
+  }catch(err){showError(err);}
+});
+document.addEventListener('click',e=>{
+  const c=e.target.closest('[data-act="pick"]'); if(c){openPicker(c.dataset.k);return;}
+  const t=e.target.closest('[data-act="ptime"]'); if(t){openTime(+t.dataset.p);return;}
+});
+$('pkList').addEventListener('click',async e=>{
+  const b=e.target.closest('button'); if(!b||!pickKey) return;
+  const cells={...(tt.cells||{})}; if(b.dataset.v) cells[pickKey]=b.dataset.v; else delete cells[pickKey];
+  tt={...tt,cells}; closePicker();
+  try{await saveTT();}catch(err){showError(err);}
+});
+$('pkSaveTime').addEventListener('click',async()=>{
+  if(!pickKey) return; const p=pickKey.split('-')[1];
+  const f=$('pkFrom').value, to=$('pkTo').value; const times={...(tt.times||{})};
+  if(f||to) times[p]=f+(to?'–'+to:''); else delete times[p];
+  tt={...tt,times}; closePicker();
+  try{await saveTT();}catch(err){showError(err);}
+});
+$('pkCancel').addEventListener('click',closePicker);
+$('picker').addEventListener('click',e=>{if(e.target.id==='picker')closePicker();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('picker').hidden)closePicker();});
+$('addBtn').addEventListener('click',()=>{
+  if(tab==='syllabus'){ if(!filterSubject) filterSubject=SUBJECTS[0].id; showImport=true; render(); $('impText')?.focus(); return; }
+  openForm(tab==='exams'?'ex':'hw');
+});
+
+function openForm(k,o){
+  $('fSubject').innerHTML=SUBJECTS.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')
+    +(o&&!SUB[o.subject]?`<option value="${esc(o.subject)}">مادة محذوفة</option>`:'');
+  editing={kind:k,id:o?o.id:null};
+  const ex=k==='ex';
+  $('formTitle').textContent = o?(ex?'تعديل الاختبار':'تعديل الواجب'):(ex?'اختبار جديد':'واجب جديد');
+  $('kindField').hidden=ex; $('examTypeField').hidden=!ex; $('timeField').hidden=!ex; $('scoreField').hidden=!ex;
+  $('fTitleLbl').textContent = ex?'المقرر في الاختبار':'المطلوب';
+  $('fTitle').placeholder = ex?'مثال: الفصل الثالث، الدروس ١ إلى ٤':'مثال: حل تمارين صفحة ٤٥';
+  $('fDueLbl').textContent = ex?'تاريخ الاختبار':'موعد التسليم';
+  $('fSubject').value=o?o.subject:(filterSubject||SUBJECTS[0].id);
+  $('fKind').value=o?.kind||'واجب';
+  $('fExType').value=o?.type||'اختبار قصير';
+  $('fTitle').value=o?.title||'';
+  $('fDue').value=ex?(o?.date||todayStr(7)):(o?.due||todayStr(1));
+  $('fTime').value=o?.time||'';
+  $('fScore').value=o?.score||'';
+  $('fNotes').value=o?.notes||'';
+  $('fErr').hidden=true;
+  $('overlay').hidden=false;
+  setTimeout(()=>$('fTitle').focus(),30);
+}
+function closeForm(){$('overlay').hidden=true;editing=null;}
+$('fCancel').addEventListener('click',closeForm);
+$('overlay').addEventListener('click',e=>{if(e.target.id==='overlay')closeForm();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('overlay').hidden)closeForm();});
+$('quick').addEventListener('click',e=>{const b=e.target.closest('button');if(b)$('fDue').value=todayStr(+b.dataset.d);});
+$('form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const k=editing.kind, ex=k==='ex';
+  const title=$('fTitle').value.trim();
+  if(!title){$('fErr').hidden=false;$('fErr').textContent=ex?'اكتب وش المقرر في الاختبار.':'اكتب المطلوب في الواجب.';$('fTitle').focus();return;}
+  const old=editing.id?listFor(k).find(x=>x.id===editing.id):null;
+  const base={
+    id: editing.id||((ex?'x':'t')+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),
+    subject:$('fSubject').value, title, notes:$('fNotes').value.trim(),
+    done:old?old.done:false, doneAt:old?old.doneAt||null:null, createdAt:old?old.createdAt:Date.now()
+  };
+  const obj = ex ? {...base,type:$('fExType').value,date:$('fDue').value||'',time:$('fTime').value||'',score:$('fScore').value.trim()}
+                 : {...base,kind:$('fKind').value,due:$('fDue').value||''};
+  $('fSave').disabled=true;
+  try{ await saveDoc(k,obj); closeForm(); }
+  catch(err){ $('fErr').hidden=false; $('fErr').textContent='ما انحفظ. حاول مرة ثانية.'; }
+  finally{ $('fSave').disabled=false; }
+});
+</script>
+
+<script>if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}</script>
+</body>
+</html>
